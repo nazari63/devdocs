@@ -11,6 +11,7 @@ import toml
 from gen.log import get_logger
 
 MAX_DEPTH = 5
+GA_TRACKING_ID = 'G-YNLYYEX7MN'
 
 log = get_logger(__name__)
 
@@ -90,6 +91,17 @@ def is_subdir(path: str | Path, parent: str | Path) -> bool:
     except ValueError:
         return False
 
+def add_ga_tracking(book_dir: str):
+    config_path = os.path.join(book_dir, 'book.toml')
+    raw_config = toml.load(config_path)
+    if 'output' not in raw_config:
+        raw_config['output'] = {}
+    if 'html' not in raw_config['output']:
+        raw_config['output']['html'] = {}
+    raw_config['output']['html']['google-analytics'] = GA_TRACKING_ID
+    with open(config_path, 'w') as f:
+        toml.dump(raw_config, f)
+
 
 def run(root_dir: str):
     submodules = os.listdir(os.path.join(root_dir, 'submodules'))
@@ -98,6 +110,7 @@ def run(root_dir: str):
         log.info(f'Processing submodule {mod}')
         book_dirs = collect_books(os.path.join(root_dir, 'submodules', mod))
         for book_dir in book_dirs:
+            add_ga_tracking(book_dir)
             config = load_book_config(book_dir)
             log.info(f'Building book {config.title}')
             build_book(config)
