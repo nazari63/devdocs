@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo "Installing Rust..."
 rustup default stable
 
@@ -14,6 +16,9 @@ cargo install mdbook-mermaid
 
 echo "Installing uv..."
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+echo "Updating submodules..."
+COMMIT=false bash "$SCRIPT_DIR/update-submodules.sh"
 
 echo "Building..."
 export PATH="$HOME/.cargo/bin:$PATH"

@@ -1,0 +1,32 @@
+version: 2.1
+
+jobs:
+  trigger-netlify-build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Trigger Netlify Build Hook
+          command: |
+            curl -X POST -d {} $NETLIFY_BUILD_HOOK
+
+workflows:
+  version: 2
+  scheduled-builds:
+    triggers:
+      - schedule:
+          cron: "0 */4 * * *"  # Every 4 hours
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - trigger-netlify-build
+
+  develop-builds:
+    jobs:
+      - trigger-netlify-build:
+          filters:
+            branches:
+              only:
+                - main

@@ -1,6 +1,6 @@
 # devdocs
 
-This repo aggregates `mdbook` docs from multiple repositories, and deploys them as a single website on Netlify. It 
+This repo aggregates `mdbook` docs from multiple repositories, and deploys them as a single website on Netlify. It
 works like this:
 
 1. Repositories are added as Git submodules,
@@ -23,7 +23,7 @@ The repo will need to be public for Netlify to process it.
 
 ## Adding new books
 
-Once your repository has been added as a submodule, you can create a new book by initializing an `mdbook` in any 
+Once your repository has been added as a submodule, you can create a new book by initializing an `mdbook` in any
 subdirectory. In your `book.toml` make sure to specify the following fields:
 
 ```toml
@@ -35,5 +35,10 @@ description = "A book about my project" # used to generate the index page
 build-dir = "some-subdirectory" # defines which subdirectory the book will be deployed to
 ```
 
-Optionally, you can use `mdbook-mermaid` to render Mermaid diagrams in your book. Otherwise, don't install 
-additional renderers/plugins to your book without installing them in `scripts/build-netlify.sh` first. 
+Optionally, you can use `mdbook-mermaid` to render Mermaid diagrams in your book. Otherwise, don't install
+additional renderers/plugins to your book without installing them in `scripts/build-netlify.sh` first.
+
+## CI
+
+Books are rebuilt every four hours. There's no need to manually update the submodules unless you need to build the books
+locally. The Netlify builder will automatically update the submodules with every build.

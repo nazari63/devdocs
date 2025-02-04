@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+COMMIT=${COMMIT:-"true"}
 SUBMODULES=$(git submodule status | awk '{print $2}' | cut -d'/' -f2)
 
 for SUBMODULE in $SUBMODULES; do
@@ -18,9 +21,11 @@ for SUBMODULE in $SUBMODULES; do
   cd ../..
 done
 
-if git diff --cached --quiet; then
-  echo "No changes to commit"
-else
-  git add submodules
-  git commit -m "Update submodules"
+if [ "$COMMIT" == "true" ]; then
+  if git diff --cached --quiet; then
+    echo "No changes to commit"
+  else
+    git add submodules
+    git commit -m "Update submodules"
+  fi
 fi
