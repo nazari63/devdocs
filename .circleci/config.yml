@@ -12,10 +12,10 @@ jobs:
 
 workflows:
   version: 2
-  scheduled-builds:
+  scheduled:
     triggers:
       - schedule:
-          cron: "0 */4 * * *"  # Every 4 hours
+          cron: "0 0,4,8,12,16,20 * * *"
           filters:
             branches:
               only:
@@ -23,7 +23,7 @@ workflows:
     jobs:
       - trigger-netlify-build
 
-  develop-builds:
+  main:
     jobs:
       - trigger-netlify-build:
           filters:
