@@ -9,6 +9,7 @@ for SUBMODULE in $SUBMODULES; do
   echo "Updating $SUBMODULE"
   cd "submodules/$SUBMODULE"
   git fetch
+  git reset --hard
   if [[ "$SUBMODULE" == "optimism" ]]; then
     git checkout develop
     git pull origin develop

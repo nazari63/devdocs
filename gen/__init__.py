@@ -12,6 +12,7 @@ from gen.log import get_logger
 
 MAX_DEPTH = 5
 GA_TRACKING_ID = 'G-YNLYYEX7MN'
+INDEX_MOD = 'index'
 
 log = get_logger(__name__)
 
@@ -91,6 +92,7 @@ def is_subdir(path: str | Path, parent: str | Path) -> bool:
     except ValueError:
         return False
 
+
 def add_ga_tracking(book_dir: str):
     config_path = os.path.join(book_dir, 'book.toml')
     raw_config = toml.load(config_path)
@@ -106,27 +108,54 @@ def add_ga_tracking(book_dir: str):
 def run(root_dir: str):
     submodules = os.listdir(os.path.join(root_dir, 'submodules'))
 
+    # Put the index module first since it outputs to the public directory, which will be deleted
+    # by the book processor
+    index_module_idx = submodules.index(INDEX_MOD)
+    submodules[0], submodules[index_module_idx] = submodules[index_module_idx], submodules[0]
+
+    mods_by_book = []
+
     for mod in submodules:
-        log.info(f'Processing submodule {mod}')
         book_dirs = collect_books(os.path.join(root_dir, 'submodules', mod))
+        configs = []
         for book_dir in book_dirs:
             add_ga_tracking(book_dir)
-            config = load_book_config(book_dir)
+            configs.append(load_book_config(book_dir))
+        mods_by_book.append((mod, configs))
+
+    # Generate the README.md file for the index module
+    with open(os.path.join(root_dir, 'submodules', 'index', 'src', 'README.md'), 'a') as f:
+        for mod, configs in mods_by_book:
+            if mod == INDEX_MOD:
+                continue
+            f.write(f'## `ethereum-optimism/{mod}`\n\n')
+            for config in configs:
+                config = load_book_config(config.dir)
+                f.write(f'- [{config.title}](https://devdocs.optimism.io/{config.site_url.replace('/', '')})\n')
+            f.write('\n')
+
+    for mod, configs in mods_by_book:
+        log.info(f'Processing submodule {mod}')
+
+        for config in configs:
             log.info(f'Building book {config.title}')
             build_book(config)
 
-            outdir = os.path.join(root_dir, 'public', config.site_url)
+            if mod == INDEX_MOD:
+                outdir = os.path.join(root_dir, 'public')
+            else:
+                outdir = os.path.join(root_dir, 'public', config.site_url)
+
             log.info(f'Moving book {config.title} to public dir {outdir}')
 
             if not is_subdir(outdir, root_dir):
                 raise ValueError(f'Output directory {outdir} is not a subdirectory of root dir {root_dir}!')
-
             if os.path.exists(outdir):
                 log.info(f'Removing existing build dir {outdir}')
                 shutil.rmtree(outdir)
-
             os.mkdir(outdir)
+
             os.rename(
-                os.path.join(book_dir, config.build_dir),
-                os.path.join(root_dir, 'public', config.site_url)
+                os.path.join(config.dir, config.build_dir),
+                outdir
             )
