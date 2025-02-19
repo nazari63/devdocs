@@ -42,3 +42,4 @@ additional renderers/plugins to your book without installing them in `scripts/bu
 
 Books are rebuilt every four hours. There's no need to manually update the submodules unless you need to build the books
 locally. The Netlify builder will automatically update the submodules with every build.
+This project is a demonstration of blockchain technology and smart contract integration.
